@@ -1,6 +1,7 @@
 const jsonfile = require('jsonfile')
 const file = process.env.FILEPATH;
 const fs = require('fs').promises;
+var moment = require('moment');
 
 const addReview = async (req, res, next) => {
     try {
@@ -41,17 +42,24 @@ const monthlyRating = (req, res, next) => {
     //Allows to get average monthly ratings per store.
     return jsonfile.readFile(file)
         .then(data => {
-            let result = [];
-            stores.forEach(store => {
-                let reviews = data.filter(d => d.review_source === store.name);
-                let rating = 0;
-                let count = 0;
-                reviews.forEach(review => {
-                    rating += review.rating
-                    count++;
-                })
-                result.push({ store: store.name, AverageMonthlyRating: Math.floor(rating / count) })
-            })
+            let result = {};
+            data.forEach(element => {
+                if (!Object.keys(result).includes(element.review_source)) {
+                    result[element.review_source] = {}
+                }
+                var momentDate = moment(element.reviewed_date, 'YYYY/MM/DD');
+                var month = momentDate.format('M');
+                var year = momentDate.format('Y');
+                if (!Object.keys(result[element.review_source]).includes(year)) {
+                    result[element.review_source][year] = {}
+                }
+                if (!Object.keys(result[element.review_source][year]).includes(month)) {
+                    result[element.review_source][year][month] = { rating: 0 }
+                    result[element.review_source][year][month]["rating"] = element.rating;
+                } else {
+                    result[element.review_source][year][month]["rating"] = (result[element.review_source][year][month]["rating"] + element.rating) / 2;
+                }
+            });
             res.json(result);
         })
         .catch(error => {
