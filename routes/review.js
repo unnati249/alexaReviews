@@ -1,5 +1,9 @@
 const express = require('express');
-const { addReview, searchReview, monthlyRating, totalRating } = require('../controller/review');
+const { addReview} = require('../controller/addReview');
+const { searchReview} = require('../controller/searchReview');
+const { monthlyRating} = require('../controller/monthlyRating');
+const { totalRating} = require('../controller/totalRating');
+
 const router = express.Router();
 const { addReviewValidationRules, searchReviewValidationRules, validate } = require('../validation/validation');
 
